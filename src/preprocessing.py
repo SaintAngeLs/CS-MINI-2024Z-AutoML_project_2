@@ -1,5 +1,4 @@
-#preporcessing.py
-
+# processing.py
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -14,16 +13,19 @@ class DataPreprocessor:
         """
         Preprocess the dataset and optionally apply feature selection.
         
-        :param data: Input dataset.
-        :param target_column: Name of the target column.
-        :param selected_features: List of selected feature indices.
-        :return: Preprocessed feature matrix, target vector, and preprocessor object.
+        :param data: Input dataset (pandas DataFrame).
+        :param target_column: Name of the target column in the DataFrame.
+        :param selected_features: List of selected feature indices (optional).
+        :return: (X_preprocessed, y, preprocessor)
         """
         categorical_cols = data.select_dtypes(include=['object']).columns
         numerical_cols = data.select_dtypes(include=['number']).columns
+
+        # Drop target column if it's in numerical_cols
         if target_column in numerical_cols:
             numerical_cols = numerical_cols.drop(target_column)
 
+        # Pipelines for numeric/categorical data
         cat_pipeline = Pipeline(steps=[
             ('imputer', SimpleImputer(strategy='most_frequent')),
             ('onehot', OneHotEncoder(handle_unknown='ignore'))
@@ -33,6 +35,7 @@ class DataPreprocessor:
             ('scaler', StandardScaler())
         ])
 
+        # Combine into a single column transformer
         preprocessor = ColumnTransformer(
             transformers=[
                 ('num', num_pipeline, numerical_cols),
@@ -44,6 +47,8 @@ class DataPreprocessor:
         y = data[target_column]
 
         X_preprocessed = preprocessor.fit_transform(X)
+
+        # If you wanted to further select specific features by index:
         if selected_features is not None:
             X_preprocessed = X_preprocessed[:, selected_features]
 
