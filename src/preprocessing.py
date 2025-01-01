@@ -21,11 +21,9 @@ class DataPreprocessor:
         categorical_cols = data.select_dtypes(include=['object']).columns
         numerical_cols = data.select_dtypes(include=['number']).columns
 
-        # Drop target column if it's in numerical_cols
         if target_column in numerical_cols:
             numerical_cols = numerical_cols.drop(target_column)
 
-        # Pipelines for numeric/categorical data
         cat_pipeline = Pipeline(steps=[
             ('imputer', SimpleImputer(strategy='most_frequent')),
             ('onehot', OneHotEncoder(handle_unknown='ignore'))
@@ -35,7 +33,6 @@ class DataPreprocessor:
             ('scaler', StandardScaler())
         ])
 
-        # Combine into a single column transformer
         preprocessor = ColumnTransformer(
             transformers=[
                 ('num', num_pipeline, numerical_cols),
@@ -48,7 +45,6 @@ class DataPreprocessor:
 
         X_preprocessed = preprocessor.fit_transform(X)
 
-        # If you wanted to further select specific features by index:
         if selected_features is not None:
             X_preprocessed = X_preprocessed[:, selected_features]
 

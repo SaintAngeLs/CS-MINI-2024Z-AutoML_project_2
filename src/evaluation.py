@@ -22,7 +22,6 @@ class ModelEvaluator:
             model.predict_proba(X)[:, 1] if hasattr(model, "predict_proba") else predictions
         )
 
-        # Avoid division by zero in Precision, Recall, and F1-Score
         unique_preds = set(predictions)
         if len(unique_preds) < 2:
             print("Warning: Model predicts only one class. Adjusting metrics to avoid zero-division.")

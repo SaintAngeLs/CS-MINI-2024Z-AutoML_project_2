@@ -11,7 +11,6 @@ class ModelOptimizer:
     """
     def __init__(self, problem_type='classification'):
         self.problem_type = problem_type
-        # Initialize your base models with random states for consistency
         self.models = {
             'classification': [
                 ('RandomForest', RandomForestClassifier(random_state=42)),
@@ -30,8 +29,7 @@ class ModelOptimizer:
         :param param_grids: A dictionary containing parameter grids for each model.
         :return: (best_model, best_score) where best_score is the best CV score (AUC).
         """
-        # We'll optimize based on AUC
-        scoring_metric = "roc_auc"  # <-- Use the built-in 'roc_auc'
+        scoring_metric = "roc_auc"  
 
         if param_grids is None:
             param_grids = {
@@ -57,17 +55,15 @@ class ModelOptimizer:
         best_model = None
         best_score = 0.0
 
-        # Iterate over each model type
         for name, model in tqdm(self.models.get(self.problem_type, []), desc="Model Optimization"):
             grid_search = GridSearchCV(
                 estimator=model,
                 param_grid=param_grids.get(name, {}),
-                scoring=scoring_metric,  # <--- using 'roc_auc'
+                scoring=scoring_metric,
                 cv=3
             )
             grid_search.fit(X, y)
 
-            # GridSearchCV.best_score_ will be the mean cross-validated ROC AUC
             if grid_search.best_score_ > best_score:
                 best_model = grid_search.best_estimator_
                 best_score = grid_search.best_score_
