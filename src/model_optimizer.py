@@ -1,9 +1,13 @@
-from sklearn.model_selection import GridSearchCV
+# model_optimizer.py
+
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
-from sklearn.metrics import roc_auc_score
 from tqdm import tqdm
+from xgboost import XGBClassifier
+
+
 
 class ModelOptimizer:
     """
@@ -11,25 +15,31 @@ class ModelOptimizer:
     """
     def __init__(self, problem_type='classification'):
         self.problem_type = problem_type
+        
+        # Candidate models (including XGBoost)
         self.models = {
             'classification': [
                 ('RandomForest', RandomForestClassifier(random_state=42)),
                 ('GradientBoosting', GradientBoostingClassifier(random_state=42)),
                 ('LogisticRegression', LogisticRegression(max_iter=1000, random_state=42)),
-                ('SVM', SVC(probability=True, random_state=42))
+                ('SVM', SVC(probability=True, random_state=42)),
+                ('XGBoost', XGBClassifier(eval_metric='logloss', random_state=42))
             ],
         }
 
     def optimize_model(self, X, y, param_grids=None):
         """
-        Optimize models using GridSearchCV with parameter grids.
+        Optimize models using GridSearchCV with parameter grids, scoring by ROC AUC, 
+        and a custom StratifiedKFold cross-validator.
 
         :param X: Feature matrix (training).
         :param y: Target vector (training).
-        :param param_grids: A dictionary containing parameter grids for each model.
-        :return: (best_model, best_score) where best_score is the best CV score (AUC).
+        :param param_grids: Optional dict of parameter grids for each model.
+        :return: (best_model, best_score) => best_score is the best CV AUC.
         """
-        scoring_metric = "roc_auc"  
+        scoring_metric = "roc_auc"  # Evaluate by AUC
+
+        skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
 
         if param_grids is None:
             param_grids = {
@@ -49,6 +59,12 @@ class ModelOptimizer:
                 'SVM': {
                     'C': [0.1, 1],
                     'kernel': ['linear', 'rbf']
+                },
+                'XGBoost': {
+                    'n_estimators': [50, 100],
+                    'learning_rate': [0.1, 0.01],
+                    'scale_pos_weight': [1, 2],  
+                    'max_depth': [3, 5]
                 }
             }
 
@@ -60,7 +76,7 @@ class ModelOptimizer:
                 estimator=model,
                 param_grid=param_grids.get(name, {}),
                 scoring=scoring_metric,
-                cv=3
+                cv=skf,  
             )
             grid_search.fit(X, y)
 

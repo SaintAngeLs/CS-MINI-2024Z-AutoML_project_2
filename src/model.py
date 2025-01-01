@@ -1,4 +1,7 @@
 # model.py
+# A sample deep learning model for recommendation-like tasks (binary classification).
+# Optional for more advanced usage with a custom training loop, etc.
+
 import torch
 import torch.nn as nn
 
