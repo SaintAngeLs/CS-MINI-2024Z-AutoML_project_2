@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')  # For headless environments (no GUI)
+matplotlib.use('Agg')  
 import matplotlib.pyplot as plt
 
 from sklearn.metrics import (
@@ -10,7 +10,7 @@ from sklearn.metrics import (
     f1_score, confusion_matrix, classification_report
 )
 
-REPORT_DIR = "report"  # Default directory for HTML and images
+REPORT_DIR = "report"  
 
 class ModelEvaluator:
     """
@@ -164,7 +164,6 @@ class ModelEvaluator:
         plt.ylabel('True label')
         plt.xlabel('Predicted label')
 
-        # Put text in each cell
         thresh = cm.max() / 2.
         for i in range(cm.shape[0]):
             for j in range(cm.shape[1]):
@@ -252,28 +251,22 @@ class ModelEvaluator:
         The images are assumed to be in the same folder as the HTML file. 
         We'll reference them by their filenames (not absolute paths).
         """
-        # 1) Metrics as HTML
         metrics_html = "<ul>"
         for k, v in metrics_dict.items():
             metrics_html += f"<li><strong>{k}:</strong> {v:.4f}</li>"
         metrics_html += "</ul>"
 
-        # 2) Confusion Matrix
         if cm is not None and cm_img_path:
             cm_html = f'<h2>Confusion Matrix</h2><img src="{cm_img_path}" width="300">'
         else:
             cm_html = "<p>No confusion matrix (single-class prediction?).</p>"
 
-        # 3) Classification report
         cls_html = f"<pre>{cls_report}</pre>" if cls_report else "<p>No classification report available.</p>"
 
-        # 4) ROC curve
         roc_html = f'<h2>ROC Curve</h2><img src="{roc_img_path}" width="300">' if roc_img_path else ""
 
-        # 5) Precision-Recall curve
         pr_html = f'<h2>Precision-Recall Curve</h2><img src="{pr_img_path}" width="300">' if pr_img_path else ""
 
-        # 6) Put it all together
         html_template = f"""
         <html>
           <head>

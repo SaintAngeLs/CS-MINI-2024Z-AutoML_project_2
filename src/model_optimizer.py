@@ -1,13 +1,10 @@
-# model_optimizer.py
-
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
 from tqdm import tqdm
 from xgboost import XGBClassifier
-
-
 
 class ModelOptimizer:
     """
@@ -15,15 +12,15 @@ class ModelOptimizer:
     """
     def __init__(self, problem_type='classification'):
         self.problem_type = problem_type
-        
-        # Candidate models (including XGBoost)
+
         self.models = {
             'classification': [
                 ('RandomForest', RandomForestClassifier(random_state=42)),
                 ('GradientBoosting', GradientBoostingClassifier(random_state=42)),
                 ('LogisticRegression', LogisticRegression(max_iter=1000, random_state=42)),
                 ('SVM', SVC(probability=True, random_state=42)),
-                ('XGBoost', XGBClassifier(eval_metric='logloss', random_state=42))
+                ('XGBoost', XGBClassifier(eval_metric='logloss', random_state=42)),
+                ('KNN', KNeighborsClassifier())
             ],
         }
 
@@ -37,7 +34,7 @@ class ModelOptimizer:
         :param param_grids: Optional dict of parameter grids for each model.
         :return: (best_model, best_score) => best_score is the best CV AUC.
         """
-        scoring_metric = "roc_auc"  # Evaluate by AUC
+        scoring_metric = "roc_auc" 
 
         skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
 
@@ -65,6 +62,10 @@ class ModelOptimizer:
                     'learning_rate': [0.1, 0.01],
                     'scale_pos_weight': [1, 2],  
                     'max_depth': [3, 5]
+                },
+                'KNN': {
+                    'n_neighbors': [3, 5, 7],
+                    'weights': ['uniform', 'distance']
                 }
             }
 

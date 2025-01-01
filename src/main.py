@@ -92,7 +92,6 @@ def main():
     ]
     data2 = data2[columns2]
 
-    # Treat "Ladder score" as the target column for the second dataset (convert to binary if needed)
     target_column2 = "Ladder score"
     data2[target_column2] = (data2[target_column2] > data2[target_column2].mean()).astype(int)
     preprocess_and_train(data2, target_column=target_column2, output_filename="evaluation_report_happiness.html", output_path="../reports/happiness")
