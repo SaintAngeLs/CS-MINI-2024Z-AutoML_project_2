@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import json
 import matplotlib
-matplotlib.use('Agg')  # Use a non-interactive backend so plots can be saved headlessly
+matplotlib.use('Agg') 
 import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
@@ -13,12 +13,9 @@ from sklearn.metrics import accuracy_score, roc_auc_score
 from boruta import BorutaPy
 from sklearn.feature_selection import SelectKBest, f_classif, VarianceThreshold
 
-# For SHAP-based selection
 import shap
-# For ReliefF from scikit-rebate
 from skrebate import ReliefF
 
-# Local imports
 from preprocessing import DataPreprocessor
 from feature_selector import EnhancedFeatureSelector
 
@@ -46,10 +43,8 @@ def compare_feature_selectors(data, target_column, n_features=10):
     print("Preprocessing data...")
     X, y, _ = preprocessor.preprocess(data, target_column)
 
-    # Convert y to plain NumPy array for indexing
     y = y.values
 
-    # If X is sparse, convert to dense
     if hasattr(X, "toarray"):
         X = X.toarray()
 
@@ -86,8 +81,9 @@ def compare_feature_selectors(data, target_column, n_features=10):
     # SHAP-based
     # ---------------------------
     print("Testing SHAP-based feature selection...")
-    shap_selector = EnhancedFeatureSelector(input_dim=X_train.shape[1])
-    top_features = shap_selector.select_via_shap(X_train, y_train, n_features=n_features)
+    model_opt_selector = EnhancedFeatureSelector(input_dim=X_train.shape[1])
+    # top_features = model_opt_selector.select_via_shap(X_train, y_train, n_features=n_features)
+    top_features = model_opt_selector.select_via_model_optimizer(X_train, y_train, n_features=n_features)
 
     X_train_shap = X_train[:, top_features]
     X_test_shap  = X_test[:, top_features]
