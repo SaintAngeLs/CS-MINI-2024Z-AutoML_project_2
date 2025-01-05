@@ -23,7 +23,8 @@ def preprocess_and_train(data, target_column, columns_to_use=None, n_features=10
     # Feature Selection
     print("Performing feature selection...")
     selector = EnhancedFeatureSelector(input_dim=X_train.shape[1])
-    top_features = selector.select_via_shap(X_train, y_train, n_features=n_features)
+    # top_features = selector.select_via_shap(X_train, y_train, n_features=n_features)
+    top_features = selector.select_via_model_optimizer(X_train, y_train, n_features=n_features)
 
     reduced_selector = EnhancedFeatureSelector(input_dim=len(top_features))
 
