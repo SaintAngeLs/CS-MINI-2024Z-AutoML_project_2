@@ -1,21 +1,19 @@
-# feature_selector.py
-
 import torch
 import torch.nn as nn
 import numpy as np
 import shap
-from sklearn.ensemble import RandomForestClassifier
 from model_optimizer import ModelOptimizer
+from sklearn.ensemble import RandomForestClassifier
+
 
 class EnhancedFeatureSelector(nn.Module):
     """
     Dynamically selects features using a trainable controller mechanism 
-    and supports multiple ways to pick top features.
+    and supports multiple optimization methods for feature selection.
     """
     def __init__(self, input_dim):
         super(EnhancedFeatureSelector, self).__init__()
-        # 'alpha' is a trainable parameter if you want to do 
-        # gradient-based selection. (Optional usage.)
+        # Trainable parameter for gradient-based feature selection
         self.alpha = nn.Parameter(torch.rand(input_dim))
 
     def forward(self, x):
@@ -23,19 +21,14 @@ class EnhancedFeatureSelector(nn.Module):
         Forward pass to calculate feature selection probabilities and apply them.
         """
         probabilities = torch.sigmoid(self.alpha)
-        # Expand to match x's batch dimension
         probabilities = probabilities.unsqueeze(0).expand(x.shape[0], -1)
         selected_features = probabilities * x
         return selected_features, probabilities
 
-    # ----------------------------------------------------------------
-    # 1) Original SHAP-based Method
-    # ----------------------------------------------------------------
     @staticmethod
     def select_via_shap(X, y, n_features=10):
         """
-        Use SHAP to select top n_features based on feature importance 
-        from a RandomForestClassifier.
+        Use SHAP to select top n_features based on feature importance from a RandomForestClassifier.
         """
         if hasattr(X, "toarray"):
             X = X.toarray()
@@ -49,8 +42,6 @@ class EnhancedFeatureSelector(nn.Module):
         shap_values = explainer.shap_values(X, check_additivity=False)
         shap_values = np.array(shap_values)
 
-        # If binary => shap_values has shape (2, n_samples, n_features)
-        # Average across classes => (n_samples, n_features)
         if shap_values.ndim == 3:
             shap_values = shap_values.mean(axis=0)
 
@@ -58,52 +49,51 @@ class EnhancedFeatureSelector(nn.Module):
         top_features = np.argsort(feature_importances)[-n_features:]
         return top_features
 
-    # ----------------------------------------------------------------
-    # 2) Model-Optimizer-based Method
-    # ----------------------------------------------------------------
     @staticmethod
-    def select_via_model_optimizer(X, y, n_features=10, param_grids=None):
+    def select_via_model_optimizer(X, y, n_features=10, param_grids=None, method="dynamic"):
         """
-        1) Use your ModelOptimizer to find the BEST classifier 
-           across multiple models/hyperparams using the FULL feature set.
-        2) Extract feature importance or coefficients from that best model.
-        3) Return the top N feature indices.
+        Select top features using ModelOptimizer by dynamically choosing the optimization method.
 
-        NOTE: Some models (KNN, SVM) do not expose 'feature_importances_' or 'coef_'.
-              If such a model is best, raise an error or handle gracefully.
+        :param X: Feature matrix.
+        :param y: Target labels.
+        :param n_features: Number of top features to select.
+        :param param_grids: Hyperparameter grids for optimization.
+        :param method: Optimization method: "grid", "random", "bayesian", or "dynamic".
+        :return: Indices of top N features.
         """
         if hasattr(X, "toarray"):
             X = X.toarray()
 
-        # 1) Optimize across multiple classifiers
-        optimizer = ModelOptimizer()
-        best_model, best_score = optimizer.optimize_model(X, y, param_grids=param_grids)
+        # Determine optimization method dynamically if set to "dynamic"
+        if method == "dynamic":
+            n_samples, n_features_total = X.shape
+            if n_features_total <= 50:
+                method = "grid"  # Small feature set, exhaustive grid search
+            elif 50 < n_features_total <= 200:
+                method = "random"  # Medium feature set, random search
+            else:
+                method = "bayesian"  # Large feature set, Bayesian optimization
 
-        # 2) Extract feature importances or coefficients
+        optimizer = ModelOptimizer()
+        best_model, best_score = optimizer.optimize_model(X, y, param_grids=param_grids, method=method)
+
+        # Extract feature importances or coefficients
         feature_importances = None
-        model_name = type(best_model).__name__  # e.g. 'RandomForestClassifier'
+        model_name = type(best_model).__name__
 
         if hasattr(best_model, "feature_importances_"):
-            # e.g. RandomForestClassifier, GradientBoostingClassifier, XGBClassifier
             feature_importances = best_model.feature_importances_
         elif hasattr(best_model, "coef_"):
-            # e.g. LogisticRegression
-            # 'coef_' shape => (1, n_features) or (n_classes, n_features)
             coefs = best_model.coef_
-            # If multiclass => average across classes, or pick 1
             if coefs.ndim == 2:
-                # We'll just do mean across classes
                 coefs = np.mean(coefs, axis=0)
             feature_importances = np.abs(coefs)
         else:
-            # e.g. SVC(kernel='rbf'), KNN, etc. => no direct feature importance
-            msg = (f"Best model is {model_name} which does not expose feature importances. "
-                   "Cannot proceed with feature-based selection.")
-            raise ValueError(msg)
+            raise ValueError(f"Model {model_name} does not support feature importances.")
 
         if feature_importances is None:
-            raise ValueError(f"Could not obtain feature importances from model {model_name}")
+            raise ValueError(f"Could not extract feature importances from {model_name}.")
 
-        # 3) Sort and pick top N
+        # Select top features
         top_features = np.argsort(feature_importances)[-n_features:]
         return top_features
