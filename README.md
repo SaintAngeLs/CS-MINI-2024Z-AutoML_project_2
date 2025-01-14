@@ -1,5 +1,11 @@
 # FeatureFlex: An AutoML Project with Advanced Feature Selection
 
+![PyPI - Version](https://img.shields.io/pypi/v/FeatureFlex)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/FeatureFlex)
+![GitHub - License](https://img.shields.io/github/license/SaintAngeLs/CS-MINI-2024Z-AutoML_project_2)
+![GitHub - Issues](https://img.shields.io/github/issues/SaintAngeLs/CS-MINI-2024Z-AutoML_project_2)
+![GitHub - Forks](https://img.shields.io/github/forks/SaintAngeLs/CS-MINI-2024Z-AutoML_project_2?style=social)
+
 ## Overview
 FeatureFlex is an AutoML project that provides a comprehensive suite of machine learning capabilities. It includes advanced preprocessing, feature selection, model optimization, and evaluation functionalities, making it a robust choice for tackling classification tasks with large and complex datasets.
 
@@ -105,7 +111,7 @@ The package includes utilities tested with datasets such as:
 
 - [Avazu CTR Prediction Dataset (50k random rows)](https://www.kaggle.com/datasets/gauravduttakiit/avazu-ctr-prediction-with-random-50k-rows)
 
-For more information on the dataset's context and alternative inspiration package AutoFeat, see:
+For more information on the dataset's context, see:
 - [AutoML Research](https://arxiv.org/pdf/2204.09078)
 
 ---
