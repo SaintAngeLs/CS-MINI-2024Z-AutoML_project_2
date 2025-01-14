@@ -25,17 +25,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install build twine
 
+          - name: Check commit message for '[deploy]'
+          id: check-deploy
+          run: |
+            if ! git log -1 --pretty=%B | grep -q '\[deploy\]'; then
+              echo "No [deploy] tag found in the commit message. Skipping deployment."
+              exit 0
+            fi
+  
       - name: Build package
+        if: steps.check-deploy.outputs.result == 'true'
         run: |
           python -m build --sdist --wheel --outdir dist/
 
       - name: Publish to PyPI
+        if: steps.check-deploy.outputs.result == 'true'
         run: |
-            python -m twine upload \
-                --non-interactive \
-                --repository-url https://upload.pypi.org/legacy/ \
-                dist/*
+          python -m twine upload \
+            --non-interactive \
+            --repository-url https://upload.pypi.org/legacy/ \
+            dist/*
         env:
-            TWINE_USERNAME: "__token__"
-            TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          TWINE_USERNAME: "__token__"
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         
