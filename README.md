@@ -9,17 +9,17 @@
 ## Overview
 FeatureFlex is an AutoML project that provides a comprehensive suite of machine learning capabilities. It includes advanced preprocessing, feature selection, model optimization, and evaluation functionalities, making it a robust choice for tackling classification tasks with large and complex datasets.
 
-This package is particularly suited for tasks requiring feature selection and comparison across multiple methods, including SHAP, Boruta, SelectKBest, and more.
+This package is particularly suited for tasks requiring feature selection and comparison across multiple methods, including SHAP, Boruta, SelectKBest, and ReliefF.
 
 ---
 
 ## Features
 
 - **Advanced Feature Selection**:
-  - Boruta
-  - SelectKBest
+  - Boruta ([GitHub - BorutaPy](https://github.com/scikit-learn-contrib/boruta_py))
+  - SelectKBest ([Scikit-learn Documentation](https://scikit-learn.org/dev/modules/generated/sklearn.feature_selection.SelectKBest.html))
   - SHAP-based feature selection
-  - ReliefF (via scikit-rebate)
+  - ReliefF (via scikit-rebate: [GitHub - scikit-rebate](https://github.com/EpistasisLab/scikit-rebate))
 
 - **Dynamic Model Optimization**:
   - Grid search
@@ -44,6 +44,20 @@ Install FeatureFlex via PyPI:
 pip install FeatureFlex
 ```
 
+### Additional Dependencies for Feature Selection
+
+To use ReliefF, install `scikit-rebate`:
+
+```bash
+pip install skrebate
+```
+
+To use Boruta, install `BorutaPy`:
+
+```bash
+pip install boruta
+```
+
 ---
 
 ## Usage
@@ -64,12 +78,44 @@ X, y, _ = preprocessor.preprocess(data, target_column="click")
 
 FeatureFlex allows you to use various feature selection techniques:
 
+#### Using SHAP-based Feature Selection
+
 ```python
 from feature_selector import EnhancedFeatureSelector
 
-# Using SHAP-based feature selection
 selector = EnhancedFeatureSelector(input_dim=X.shape[1])
 top_features = selector.select_via_shap(X, y, n_features=10)
+```
+
+#### Using Boruta
+
+```python
+from boruta import BorutaPy
+from sklearn.ensemble import RandomForestClassifier
+
+rf = RandomForestClassifier(random_state=42)
+boruta_selector = BorutaPy(rf, n_estimators='auto', random_state=42)
+boruta_selector.fit(X, y)
+selected_features = X[:, boruta_selector.support_]
+```
+
+#### Using SelectKBest
+
+```python
+from sklearn.feature_selection import SelectKBest, f_classif
+
+selector = SelectKBest(score_func=f_classif, k=10)
+selected_features = selector.fit_transform(X, y)
+```
+
+#### Using ReliefF
+
+```python
+from skrebate import ReliefF
+
+selector = ReliefF(n_features_to_select=10)
+selector.fit(X, y)
+selected_features = selector.transform(X)
 ```
 
 ### Model Optimization
@@ -156,8 +202,8 @@ FeatureFlex depends on the following libraries:
   - `matplotlib`, `shap`, `optuna`
 
 - **Feature Selection**:
-  - `BorutaPy`
-  - `scikit-rebate`
+  - `BorutaPy` ([GitHub](https://github.com/scikit-learn-contrib/boruta_py))
+  - `scikit-rebate` ([GitHub](https://github.com/EpistasisLab/scikit-rebate))
 
 - **Optimization**:
   - `optuna`
