@@ -4,6 +4,11 @@ set -e
 
 echo "Starting deployment script..."
 
+if ! git log -1 --pretty=%B | grep -q '\[deploy\]'; then
+    echo "No [deploy] tag found in the commit message. Exiting deployment script."
+    exit 0
+fi
+
 if [ -f VERSION ]; then
     version=$(cat VERSION)
     IFS='.' read -r major minor patch <<<"$version"
