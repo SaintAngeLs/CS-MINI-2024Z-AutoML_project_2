@@ -5,7 +5,7 @@ set -e
 echo "Starting deployment script..."
 
 if ! git log -1 --pretty=%B | grep -q '\[deploy\]'; then
-    echo "No [deploy] tag found in the commit message. Exiting deployment script."
+    echo "Predictively intentionally exiting deployment."
     exit 0
 fi
 
