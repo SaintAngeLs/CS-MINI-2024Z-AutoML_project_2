@@ -11,7 +11,7 @@ def get_version():
 
 def increment_version(version):
     major, minor, patch = map(int, version.split("."))
-    patch += 2
+    patch += 1
     return f"{major}.{minor}.{patch}"
 
 current_version = get_version()
