@@ -23,7 +23,7 @@ def compare_feature_selectors(data, target_column, n_features=10):
     """
     Compares various feature selection methods on the given dataset:
       1) Baseline (no feature selection)
-      2) SHAP-based (EnhancedFeatureSelector)
+      2) FeatureFlex-based (EnhancedFeatureSelector)
       3) Boruta
       4) SelectKBest
       5) ReliefF (scikit-rebate)
@@ -78,9 +78,9 @@ def compare_feature_selectors(data, target_column, n_features=10):
     results["Baseline"] = {"AUC": baseline_auc, "Accuracy": baseline_acc}
 
     # ---------------------------
-    # SHAP-based
+    # FeatureFlex-based (EnhancedFeatureSelector)
     # ---------------------------
-    print("Testing SHAP-based feature selection...")
+    print("Testing FeatureFlex-based (EnhancedFeatureSelector) feature selection...")
     model_opt_selector = EnhancedFeatureSelector(input_dim=X_train.shape[1])
     # top_features = model_opt_selector.select_via_shap(X_train, y_train, n_features=n_features)
     top_features = model_opt_selector.select_via_model_optimizer(X_train, y_train, n_features=n_features)
