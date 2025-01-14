@@ -29,7 +29,6 @@ class DateFeatureExtractor(BaseEstimator, TransformerMixin):
             X.drop(columns=[col], inplace=True)
         return X
 
-
 class DataPreprocessor:
     """
     Handles preprocessing of data including missing values, scaling, encoding, and feature extraction.
