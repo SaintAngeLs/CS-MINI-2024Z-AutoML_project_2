@@ -1,6 +1,6 @@
 alembic==1.14.0
 asttokens==3.0.0
-autofeat==2.1.3
+# autofeat==2.1.3
 Boruta==0.4.3
 build==1.2.2.post1
 certifi==2024.12.14
