@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import shap
-from model_optimizer import ModelOptimizer
+from .model_optimizer import ModelOptimizer
 from sklearn.ensemble import RandomForestClassifier
 
 
