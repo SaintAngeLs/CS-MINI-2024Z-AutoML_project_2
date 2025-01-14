@@ -1,7 +1,7 @@
 # src/FeatureFlex/main.py
 
 from preprocessing import DataPreprocessor
-from feature_selector import EnhancedFeatureSelector
+from feature_selector import EnhancedFeatureSelector, DateFeatureExtractor
 from model_optimizer import ModelOptimizer
 from evaluation import ModelEvaluator
 
